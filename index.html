@@ -1,0 +1,76 @@
+const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys')
+
+async function startBot() {
+  const { state, saveCreds } = await useMultiFileAuthState('auth')
+  const sock = makeWASocket({ auth: state })
+
+  sock.ev.on('creds.update', saveCreds)
+
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return
+    const msg = messages[0]
+    const sender = msg.key.remoteJid
+    const text = msg.message?.conversation?.toLowerCase() || ''
+
+    if (text === 'oi' || text === 'menu') {
+      await sock.sendMessage(sender, {
+        text: `👋 Olá! Bem-vindo à *Imobiliária X*.
+
+Digite o número do assunto que deseja:
+1️⃣ Leilões
+2️⃣ Financiamento habitacional
+3️⃣ Aluguel
+4️⃣ Compra
+        `
+      })
+    }
+
+    if (text === '1') {
+      await sock.sendMessage(sender, {
+        text: `🏛️ *Leilões de imóveis*
+
+📍 Qual cidade você procura?
+💰 Qual seu orçamento máximo?
+🗓 Já participou de leilões antes?
+📄 Precisa de ajuda com documentação?
+        `
+      })
+    }
+
+    if (text === '2') {
+      await sock.sendMessage(sender, {
+        text: `🏠 *Financiamento Habitacional*
+
+✅ Já tem imóvel em mente?
+📈 Qual sua renda mensal?
+🏦 Tem banco de preferência?
+📑 Já tem carta de crédito?
+        `
+      })
+    }
+
+    if (text === '3') {
+      await sock.sendMessage(sender, {
+        text: `🏙️ *Aluguel de Imóveis*
+
+📍 Qual região está buscando?
+💰 Valor máximo do aluguel?
+🏠 Tipo de imóvel: casa, apê, sala?
+        `
+      })
+    }
+
+    if (text === '4') {
+      await sock.sendMessage(sender, {
+        text: `🔑 *Compra de Imóvel*
+
+📍 Qual cidade ou bairro?
+💰 Qual o valor que pretende investir?
+🏠 Tipo de imóvel que procura?
+        `
+      })
+    }
+  })
+}
+
+startBot()
